@@ -14,16 +14,7 @@ amqp.connect("amqp://marina:abcd1234@localhost:49158",(err,con)=>{
 
       let queueAB="mensajesAB";
       let queueBA="mensajesBA"
-      let message = "Hola de Ana";
-
-      channel.assertQueue(queueAB, {
-        durable: false
-      });
-
-      channel.sendToQueue(queueAB, Buffer.from(message));
-      console.log("Mensaje enviado de A");
-
-      console.log("Esperando mensajes de B");
+      let stdin = process.openStdin();
 
       channel.assertQueue(queueBA, {
         durable: false
@@ -33,7 +24,17 @@ amqp.connect("amqp://marina:abcd1234@localhost:49158",(err,con)=>{
         console.log("-> "+ message.content.toString());
       }, {noAck: true});
 
+      stdin.addListener("data", function(message) {
 
+        channel.assertQueue(queueAB, {
+          durable: false
+        });
+
+        console.log("");
+        channel.sendToQueue(queueAB, Buffer.from(message));
+
+
+      });
 
     });
 
